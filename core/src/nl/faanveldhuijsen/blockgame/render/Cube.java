@@ -1,12 +1,9 @@
 package nl.faanveldhuijsen.blockgame.render;
 
-import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
-import com.badlogic.gdx.graphics.VertexAttribute;
 import com.badlogic.gdx.graphics.VertexAttributes.Usage;
 import com.badlogic.gdx.graphics.g3d.*;
-import com.badlogic.gdx.graphics.g3d.attributes.ColorAttribute;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
@@ -14,24 +11,28 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import nl.faanveldhuijsen.blockgame.Main;
+import nl.faanveldhuijsen.blockgame.world.World;
 
 public class Cube implements RenderableProvider {
 
+    public Vector3 position;
     private Model model;
     private ModelInstance instance;
+
+    protected final World world = World.getInstance();
 
     public Cube(Vector3 position) {
         TextureAttribute textureAttribute =
                 new TextureAttribute(TextureAttribute.Diffuse, Main.assets.get("blocks/dirt.png", Texture.class));
         Material material = new Material(textureAttribute);
 
-//        model = modelBuilder.createBox(16f, 16f, 16f, material, Usage.Position | Usage.Normal | Usage.TextureCoordinates);
-
-
         model = generateSingleTextureModel(8f, material);
 
         instance = new ModelInstance(model);
-        instance.transform.translate(position);
+        instance.transform.translate(position.scl(16F));
+
+        this.position = position;
+        this.world.registerBlock(this, position);
     }
 
     private Model generateSingleTextureModel(float size, Material material) {
@@ -41,16 +42,25 @@ public class Cube implements RenderableProvider {
         modelBuilder.begin();
         MeshPartBuilder mpb = modelBuilder.part("cube", GL20.GL_TRIANGLES, attr, material);
 
+        // North
+        mpb.rect(-size, -size, -size, -size, size, -size, size, size, -size, size, -size, -size, 0, 0, -1);
 
-        mpb.rect(-size,-size,-size, -size, size,-size, size, size,-size, size,-size,-size, 0,0,-1);
-        mpb.rect(-size, size, size, -size,-size, size, size,-size, size, size, size, size, 0,0,1);
-        mpb.rect(-size,-size, size, -size,-size,-size, size,-size,-size, size,-size, size, 0,-1,0);
-        mpb.rect(-size, size,-size, -size, size, size, size, size, size, size, size,-size, 0,1,0);
-        mpb.rect(-size,-size, size, -size, size, size,  -size, size,-size, -size,-size,-size, -1,0,0);
-        mpb.rect(size,-size,-size, size, size,-size, size, size, size, size,-size, size, 1,0,0);
+        // South
+        mpb.rect(-size, size, size, -size, -size, size, size, -size, size, size, size, size, 0, 0, 1);
+
+        // Bottom
+        mpb.rect(-size, -size, size, -size, -size, -size, size, -size, -size, size, -size, size, 0, -1, 0);
+
+        // Top
+        mpb.rect(-size, size, -size, -size, size, size, size, size, size, size, size, -size, 0, 1, 0);
+
+        // West
+        mpb.rect(-size, -size, size, -size, size, size, -size, size, -size, -size, -size, -size, -1, 0, 0);
+
+        // Oost
+        mpb.rect(size, -size, -size, size, size, -size, size, size, size, size, -size, size, 1, 0, 0);
+
         return modelBuilder.end();
-
-
 
 
 //        int attr = Usage.Position | Usage.Normal | Usage.TextureCoordinates;

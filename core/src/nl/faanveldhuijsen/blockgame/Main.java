@@ -85,7 +85,7 @@ public class Main extends ApplicationAdapter {
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 4; y++) {
                 for (int z = 0; z < 16; z++) {
-                    cubes.add(new Cube(new Vector3(x * 16, y * 16, z * 16)));
+                    cubes.add(new Cube(new Vector3(x, y, z)));
                 }
             }
         }
