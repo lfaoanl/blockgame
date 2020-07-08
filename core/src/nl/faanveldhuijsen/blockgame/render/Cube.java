@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g3d.*;
 import com.badlogic.gdx.graphics.g3d.attributes.TextureAttribute;
 import com.badlogic.gdx.graphics.g3d.utils.MeshPartBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
+import com.badlogic.gdx.math.Vector;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
@@ -15,24 +16,23 @@ import nl.faanveldhuijsen.blockgame.world.World;
 
 public class Cube implements RenderableProvider {
 
-    public Vector3 position;
+    protected final World world = World.getInstance();
+    protected Vector3 position;
     private Model model;
     private ModelInstance instance;
 
-    protected final World world = World.getInstance();
-
     public Cube(Vector3 position) {
+        this.position = position;
+
         TextureAttribute textureAttribute =
                 new TextureAttribute(TextureAttribute.Diffuse, Main.assets.get("blocks/dirt.png", Texture.class));
         Material material = new Material(textureAttribute);
 
-        model = generateSingleTextureModel(8f, material);
+        // TODO generate only when all blocks are loaded
+        model = generateSingleTextureModel(2F, material);
 
         instance = new ModelInstance(model);
-        instance.transform.translate(position.scl(16F));
-
-        this.position = position;
-        this.world.registerBlock(this, position);
+        instance.transform.translate(position.scl(4F));
     }
 
     private Model generateSingleTextureModel(float size, Material material) {
@@ -43,50 +43,73 @@ public class Cube implements RenderableProvider {
         MeshPartBuilder mpb = modelBuilder.part("cube", GL20.GL_TRIANGLES, attr, material);
 
         // North
-        mpb.rect(-size, -size, -size, -size, size, -size, size, size, -size, size, -size, -size, 0, 0, -1);
+        if (!hasBlock("north")) {
+            mpb.rect(-size, -size, -size, -size, size, -size, size, size, -size, size, -size, -size, 0, 0, -1);
+        }
 
         // South
-        mpb.rect(-size, size, size, -size, -size, size, size, -size, size, size, size, size, 0, 0, 1);
+        if (!hasBlock("south")) {
+            mpb.rect(-size, size, size, -size, -size, size, size, -size, size, size, size, size, 0, 0, 1);
+        }
 
         // Bottom
-        mpb.rect(-size, -size, size, -size, -size, -size, size, -size, -size, size, -size, size, 0, -1, 0);
+        if (!hasBlock("bottom")) {
+            mpb.rect(-size, -size, size, -size, -size, -size, size, -size, -size, size, -size, size, 0, -1, 0);
+        }
 
         // Top
-        mpb.rect(-size, size, -size, -size, size, size, size, size, size, size, size, -size, 0, 1, 0);
+        if (!hasBlock("top")) {
+            mpb.rect(-size, size, -size, -size, size, size, size, size, size, size, size, -size, 0, 1, 0);
+        }
 
         // West
-        mpb.rect(-size, -size, size, -size, size, size, -size, size, -size, -size, -size, -size, -1, 0, 0);
+        if (!hasBlock("west")) {
+            mpb.rect(-size, -size, size, -size, size, size, -size, size, -size, -size, -size, -size, -1, 0, 0);
+        }
 
-        // Oost
-        mpb.rect(size, -size, -size, size, size, -size, size, size, size, size, -size, size, 1, 0, 0);
+        // East
+        if (!hasBlock("east")) {
+            mpb.rect(size, -size, -size, size, size, -size, size, size, size, size, -size, size, 1, 0, 0);
+        }
 
         return modelBuilder.end();
+    }
 
+    private boolean hasBlock(String direction) {
+        Vector3 position = this.position.cpy();
+        switch (direction) {
+            case "north":
+                position.z -= 1;
+                break;
+            case "south":
+                position.z += 1;
+                break;
+            case "top":
+                position.y += 1;
+                break;
+            case "bottom":
+                position.y -= 1;
+                break;
+            case "west":
+                position.x -= 1;
+                break;
+            case "east":
+                position.x += 1;
+                break;
+        }
+        return world.getBlock(position) != null;
+    }
 
-//        int attr = Usage.Position | Usage.Normal | Usage.TextureCoordinates;
-//        modelBuilder.begin();
-//        modelBuilder.part("front", GL20.GL_TRIANGLES, attr, new Material(TextureAttribute.createDiffuse(AssetLoader.tr[0])))
-//                .rect(-2f,-2f,-2f, -2f,2f,-2f,  2f,2f,-2, 2f,-2f,-2f, 0,0,-1);
-//        modelBuilder.part("back", GL20.GL_TRIANGLES, attr, new Material(TextureAttribute.createDiffuse(AssetLoader.tr[1])))
-//                .rect(-2f,2f,2f, -2f,-2f,2f,  2f,-2f,2f, 2f,2f,2f, 0,0,1);
-//        modelBuilder.part("bottom", GL20.GL_TRIANGLES, attr, new Material(TextureAttribute.createDiffuse(AssetLoader.tr[2])))
-//                .rect(-2f,-2f,2f, -2f,-2f,-2f,  2f,-2f,-2f, 2f,-2f,2f, 0,-1,0);
-//        modelBuilder.part("top", GL20.GL_TRIANGLES, attr, new Material(TextureAttribute.createDiffuse(AssetLoader.tr[3])))
-//                .rect(-2f,2f,-2f, -2f,2f,2f,  2f,2f,2f, 2f,2f,-2f, 0,1,0);
-//        modelBuilder.part("left", GL20.GL_TRIANGLES, attr, new Material(TextureAttribute.createDiffuse(AssetLoader.tr[4])))
-//                .rect(-2f,-2f,2f, -2f,2f,2f,  -2f,2f,-2f, -2f,-2f,-2f, -1,0,0);
-//        modelBuilder.part("right", GL20.GL_TRIANGLES, attr, new Material(TextureAttribute.createDiffuse(AssetLoader.tr[5])))
-//                .rect(2f,-2f,-2f, 2f,2f,-2f,  2f,2f,2f, 2f,-2f,2f, 1,0,0);
-//        box = modelBuilder.end();
+    public Vector3 getPosition() {
+        return this.position;
     }
 
     @Override
-    public void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
+    public final void getRenderables(Array<Renderable> renderables, Pool<Renderable> pool) {
         instance.getRenderables(renderables, pool);
     }
 
-    public void dispose() {
-
+    public final void dispose() {
         model.dispose();
     }
 }

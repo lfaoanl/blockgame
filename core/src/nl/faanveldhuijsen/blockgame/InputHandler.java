@@ -10,7 +10,7 @@ public class InputHandler {
 
     PerspectiveCamera camera;
 
-    private final float speed = 1;
+    private final float speed = 0.5F;
 
     boolean forward = false;
     boolean back = false;

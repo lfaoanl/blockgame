@@ -15,6 +15,8 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.TextureDescriptor;
 import com.badlogic.gdx.math.Vector3;
 import nl.faanveldhuijsen.blockgame.render.Cube;
+import nl.faanveldhuijsen.blockgame.world.Chunk;
+import nl.faanveldhuijsen.blockgame.world.World;
 
 import java.util.ArrayList;
 
@@ -27,6 +29,8 @@ public class Main extends ApplicationAdapter {
 
     ArrayList<Cube> cubes = new ArrayList<Cube>();
     public static InputHandler inputHandler;
+    public final World world = World.getInstance();
+
 
     boolean loaded = false;
     boolean initialised = false;
@@ -56,7 +60,7 @@ public class Main extends ApplicationAdapter {
 	@Override
 	public void render () {
         Gdx.gl.glViewport(0, 0, Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
-        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT);
+        Gdx.gl.glClear(GL20.GL_COLOR_BUFFER_BIT | GL20.GL_DEPTH_BUFFER_BIT | (Gdx.graphics.getBufferFormat().coverageSampling?GL20.GL_COVERAGE_BUFFER_BIT_NV:0));
         Gdx.gl.glClearColor(.65f, .65f, 1, 1);
 
         if(assets.update() && !loaded) {
@@ -74,27 +78,29 @@ public class Main extends ApplicationAdapter {
 
             // Render stuff...
             modelBatch.begin(cam);
-            for (Cube cube : cubes) {
-                modelBatch.render(cube, environment);
-            }
+            modelBatch.render(world, environment);
             modelBatch.end();
         }
 	}
 
     private void initialise() {
+//        cubes.add(new Cube(new Vector3(0, 0, 0)));
+//        cubes.add(new Cube(new Vector3(0, 1, 0)));
+//        cubes.add(new Cube(new Vector3(-1, 0, -1)));
+
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 4; y++) {
                 for (int z = 0; z < 16; z++) {
-                    cubes.add(new Cube(new Vector3(x, y, z)));
+                    world.registerBlock(new Cube(new Vector3(x, y, z)));
                 }
             }
         }
+
+        System.out.println(world.chunks.size());
     }
 
     @Override
 	public void dispose () {
-        for (Cube cube : cubes) {
-            cube.dispose();
-        }
+        world.dispose();
 	}
 }
