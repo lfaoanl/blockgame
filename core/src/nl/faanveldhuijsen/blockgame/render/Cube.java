@@ -18,6 +18,8 @@ public class Cube implements RenderableProvider {
 
     protected final World world = World.getInstance();
     protected Vector3 position;
+
+    private Material material;
     private Model model;
     private ModelInstance instance;
 
@@ -26,13 +28,8 @@ public class Cube implements RenderableProvider {
 
         TextureAttribute textureAttribute =
                 new TextureAttribute(TextureAttribute.Diffuse, Main.assets.get("blocks/dirt.png", Texture.class));
-        Material material = new Material(textureAttribute);
+        material = new Material(textureAttribute);
 
-        // TODO generate only when all blocks are loaded
-        model = generateSingleTextureModel(2F, material);
-
-        instance = new ModelInstance(model);
-        instance.transform.translate(position.scl(4F));
     }
 
     private Model generateSingleTextureModel(float size, Material material) {
@@ -111,5 +108,11 @@ public class Cube implements RenderableProvider {
 
     public final void dispose() {
         model.dispose();
+    }
+
+    public void update() {
+        model = generateSingleTextureModel(2F, material);
+        instance = new ModelInstance(model);
+        instance.transform.translate(position.scl(4F));
     }
 }

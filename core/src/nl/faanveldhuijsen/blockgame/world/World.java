@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import nl.faanveldhuijsen.blockgame.render.Cube;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Map;
 import java.util.TreeMap;
@@ -18,7 +19,6 @@ public final class World implements RenderableProvider {
     private static World INSTANCE;
 
     public Map<Integer, Map<Integer, Chunk>> chunks = new TreeMap<>();
-    private String info = "Initial info class";
 
     private World() {
     }
@@ -94,4 +94,14 @@ public final class World implements RenderableProvider {
             }
         }
     }
+
+    public void initialise() {
+        for (Map.Entry<Integer, Map<Integer, Chunk>> chunkList : chunks.entrySet()) {
+            for (Map.Entry<Integer, Chunk> chunk : chunkList.getValue().entrySet()) {
+                // TODO if chunk is loaded or within distance
+                chunk.getValue().update();
+            }
+        }
+    }
+
 }

@@ -15,6 +15,8 @@ import com.badlogic.gdx.graphics.g3d.utils.ModelBuilder;
 import com.badlogic.gdx.graphics.g3d.utils.TextureDescriptor;
 import com.badlogic.gdx.math.Vector3;
 import nl.faanveldhuijsen.blockgame.render.Cube;
+import nl.faanveldhuijsen.blockgame.render.Player;
+import nl.faanveldhuijsen.blockgame.utils.FrameRate;
 import nl.faanveldhuijsen.blockgame.world.Chunk;
 import nl.faanveldhuijsen.blockgame.world.World;
 
@@ -31,9 +33,12 @@ public class Main extends ApplicationAdapter {
     public static InputHandler inputHandler;
     public final World world = World.getInstance();
 
+    private FrameRate fps;
+
 
     boolean loaded = false;
     boolean initialised = false;
+    private Player player;
 
     @Override
 	public void create () {
@@ -55,6 +60,7 @@ public class Main extends ApplicationAdapter {
         inputHandler.setInputProcessor();
         Gdx.graphics.isFullscreen();
 
+        fps = new FrameRate();
 	}
 
 	@Override
@@ -79,8 +85,12 @@ public class Main extends ApplicationAdapter {
             // Render stuff...
             modelBatch.begin(cam);
             modelBatch.render(world, environment);
+            modelBatch.render(player, environment);
             modelBatch.end();
         }
+
+        fps.render();
+        fps.update();
 	}
 
     private void initialise() {
@@ -91,16 +101,23 @@ public class Main extends ApplicationAdapter {
         for (int x = 0; x < 16; x++) {
             for (int y = 0; y < 4; y++) {
                 for (int z = 0; z < 16; z++) {
+
                     world.registerBlock(new Cube(new Vector3(x, y, z)));
                 }
             }
         }
 
+        world.initialise();
+
         System.out.println(world.chunks.size());
+
+        player = new Player(new Vector3(0, 5, 0));
     }
 
     @Override
 	public void dispose () {
         world.dispose();
+        fps.dispose();
+        player.dispose();
 	}
 }

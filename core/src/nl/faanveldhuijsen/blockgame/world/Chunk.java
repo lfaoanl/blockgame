@@ -9,6 +9,7 @@ import nl.faanveldhuijsen.blockgame.render.Cube;
 
 public class Chunk implements RenderableProvider {
 
+    public boolean loaded = true;
     public Cube[][][] blocks = new Cube[16][World.height][16];
 
     public Chunk() {
@@ -79,6 +80,25 @@ public class Chunk implements RenderableProvider {
                         continue;
                     }
                     cube.dispose();
+                }
+            }
+        }
+    }
+
+    public void update() {
+        for (Cube[][] cubeListX : blocks) {
+            if (cubeListX == null) {
+                continue;
+            }
+            for (Cube[] cubeListY : cubeListX) {
+                if (cubeListY == null) {
+                    continue;
+                }
+                for (Cube cube : cubeListY) {
+                    if (cube == null) {
+                        continue;
+                    }
+                    cube.update();
                 }
             }
         }
